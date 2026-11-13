@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-ssr/
+
+# local env
+.env
+.env.*
+*.local
+
+# logs
+*.log
+npm-debug.log*
+
+# sqlite runtime files
+*.sqlite-wal
+*.sqlite-shm
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

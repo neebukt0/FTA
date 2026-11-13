@@ -1,18 +1,16 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { ACCESS_SECRET, REFRESH_SECRET } from '../config.js';
 import { UserModel } from '../models/userModel.js';
 
-const ACCESS_SECRET = 'super-access-secret-key-123';
-const REFRESH_SECRET = 'super-refresh-secret-key-456';
-
-export const generateTokens = (payload) => {
+const generateTokens = (payload) => {
   const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });
   const refreshToken = jwt.sign(payload, REFRESH_SECRET, { expiresIn: '7d' });
   return { accessToken, refreshToken };
 };
 
-export const formatUserPayload = (user) => ({
+const formatUserPayload = (user) => ({
   userId: user.id || user.userId,
   firstName: user.firstName,
   lastName: user.lastName,
@@ -24,6 +22,7 @@ export const formatUserPayload = (user) => ({
   savings: user.savings || 0,
   createdAt: user.createdAt,
   isActivated: !!user.isActivated,
+  isBlocked: !!user.isBlocked,
 });
 
 export const register = (db) => async (req, res) => {
@@ -125,6 +124,10 @@ export const login = (db) => async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'Неверный логин или пароль' });
+    }
+
+    if (user.isBlocked) {
+      return res.status(403).json({ message: 'Аккаунт заблокирован администратором' });
     }
 
     const userPayload = formatUserPayload(user);
@@ -304,6 +307,11 @@ export const refresh = (db) => async (req, res) => {
       return res.status(401).json({ message: 'Пользователь не найден' });
     }
 
+    if (userFromDb.isBlocked) {
+      res.clearCookie('refreshToken');
+      return res.status(403).json({ message: 'Аккаунт заблокирован администратором' });
+    }
+
     const userPayload = formatUserPayload(userFromDb);
     const tokens = generateTokens(userPayload);
 
@@ -324,22 +332,4 @@ export const refresh = (db) => async (req, res) => {
 export const logout = (req, res) => {
   res.clearCookie('refreshToken');
   return res.json({ message: 'Успешный выход' });
-};
-
-export const addTransaction = (db) => async (req, res) => {
-  try {
-    const userId = req.user?.userId;
-    if (!userId) {
-      return res.status(401).json({ message: 'Не авторизован' });
-    }
-
-    const { amount, type, category, description } = req.body;
-    const updatedUser = await UserModel.addTransaction(db, userId, { amount, type, category, description });
-
-    const userPayload = formatUserPayload(updatedUser);
-    return res.json({ message: 'Транзакция успешно добавлена', user: userPayload });
-  } catch (e) {
-    console.error(e);
-    return res.status(400).json({ message: e.message || 'Ошибка при добавлении транзакции' });
-  }
 };

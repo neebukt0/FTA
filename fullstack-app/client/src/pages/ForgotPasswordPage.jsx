@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { forgotPassword, resetPassword } from '../features/auth/authSlice';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthLayout } from '../components/AuthLayout';
 
 export function ForgotPasswordPage() {
   const [step, setStep] = useState(1); // 1 - запрос email, 2 - ввод токена и нового пароля
@@ -43,66 +44,63 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Восстановление пароля</h2>
-
-      {error && <div style={{ color: 'red', marginBottom: 15, padding: 10, backgroundColor: '#ffe6e6', borderRadius: '4px', fontSize: '14px' }}>{error}</div>}
-      {message && <div style={{ color: 'green', marginBottom: 15, padding: 10, backgroundColor: '#e6ffe6', borderRadius: '4px', fontSize: '14px' }}>{message}</div>}
+    <AuthLayout
+      title="Восстановление пароля"
+      footer={
+        <>
+          Вспомнили пароль? <Link to="/login">Войти</Link>
+        </>
+      }
+    >
+      {error && <div className="alert alert-error">{error}</div>}
+      {message && <div className="alert alert-success">{message}</div>}
 
       {step === 1 ? (
         <form onSubmit={handleRequestSubmit}>
-          <div style={{ marginBottom: 15 }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: 5 }}>Email</label>
-            <input 
+          <div className="field">
+            <label className="label" htmlFor="email">Email</label>
+            <input
+              id="email"
               type="email"
-              placeholder="Введите ваш email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              style={{ display: 'block', width: '100%', padding: 10, boxSizing: 'border-box', border: '1px solid #ccc', borderRadius: '4px' }} 
+              className="input"
+              placeholder="Введите ваш email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{ width: '100%', padding: 12, backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer' }}
-          >
+          <button type="submit" disabled={loading} className="btn btn-primary btn-block">
             {loading ? 'Отправка...' : 'Отправить инструкции'}
           </button>
         </form>
       ) : (
         <form onSubmit={handleResetSubmit}>
-          <div style={{ marginBottom: 15 }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: 5 }}>Токен из консоли сервера</label>
-            <input 
-              placeholder="Введите токен" 
-              value={token} 
-              onChange={(e) => setToken(e.target.value)} 
-              style={{ display: 'block', width: '100%', padding: 10, boxSizing: 'border-box', border: '1px solid #ccc', borderRadius: '4px' }} 
+          <div className="field">
+            <label className="label" htmlFor="token">Токен из консоли сервера</label>
+            <input
+              id="token"
+              className="input"
+              placeholder="Введите токен"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
             />
           </div>
-          <div style={{ marginBottom: 15 }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: 5 }}>Новый пароль</label>
-            <input 
+          <div className="field">
+            <label className="label" htmlFor="newPassword">Новый пароль</label>
+            <input
+              id="newPassword"
               type="password"
-              placeholder="Не менее 6 символов" 
-              value={newPassword} 
-              onChange={(e) => setNewPassword(e.target.value)} 
-              style={{ display: 'block', width: '100%', padding: 10, boxSizing: 'border-box', border: '1px solid #ccc', borderRadius: '4px' }} 
+              className="input"
+              placeholder="Не менее 6 символов"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
             />
           </div>
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{ width: '100%', padding: 12, backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer' }}
-          >
+          <button type="submit" disabled={loading} className="btn btn-primary btn-block">
             {loading ? 'Сохранение...' : 'Установить новый пароль'}
           </button>
         </form>
       )}
-
-      <p style={{ marginTop: 20, textAlign: 'center', fontSize: '14px' }}>
-        Вспомнили пароль? <Link to="/login" style={{ color: '#007bff' }}>Войти</Link>
-      </p>
-    </div>
+    </AuthLayout>
   );
 }

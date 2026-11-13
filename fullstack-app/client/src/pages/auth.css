@@ -1,0 +1,78 @@
+.auth-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.auth-card {
+  width: min(440px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.auth-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.auth-footer {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.auth-footer a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap .input {
+  padding-right: 64px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.auth-card .btn-block {
+  width: 100%;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.form-hint {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 20px;
+  }
+}

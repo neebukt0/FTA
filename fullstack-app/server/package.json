@@ -1,18 +1,20 @@
 {
+  "name": "fullstack-app-server",
+  "private": true,
+  "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "start": "node --experimental-sqlite index.js",
+    "dev": "node --experimental-sqlite --watch index.js"
+  },
   "dependencies": {
-    "@vscode/sqlite3": "^5.1.14-vscode",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^6.0.1"
+    "jsonwebtoken": "^9.0.3"
   },
-  "allowScripts": {
-    "sqlite3@6.0.1": true,
-    "bcrypt@6.0.0": true,
-    "@vscode/sqlite3@5.1.14-vscode": true
+  "engines": {
+    "node": ">=22.5.0"
   }
 }

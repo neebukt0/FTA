@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { api } from '../../api/axios';
+import { api } from '../../api/http';
+import { setAccessToken } from '../../app/tokenStorage';
 
 // 1. ASYNC THUNK: РЕГИСТРАЦИЯ
 export const registerUser = createAsyncThunk(
@@ -34,7 +35,7 @@ export const checkAuth = createAsyncThunk(
     try {
       const response = await api.get('/auth/refresh');
       return response.data;
-    } catch (error) {
+    } catch {
       return rejectWithValue('Неавторизован');
     }
   }
@@ -92,21 +93,25 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        setAccessToken(action.payload.accessToken);
         state.error = null;
         state.isLoading = false;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.error = action.payload;
+        state.isLoading = false;
       })
       // Логин
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        setAccessToken(action.payload.accessToken);
         state.error = null;
         state.isLoading = false;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.error = action.payload;
+        state.isLoading = false;
       })
       // Проверка сессии (checkAuth)
       .addCase(checkAuth.pending, (state) => {
@@ -115,17 +120,26 @@ const authSlice = createSlice({
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
+        setAccessToken(action.payload.accessToken);
         state.isLoading = false;
       })
       .addCase(checkAuth.rejected, (state) => {
         state.user = null;
         state.accessToken = null;
+        setAccessToken(null);
         state.isLoading = false;
       })
       // Выход
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.accessToken = null;
+        setAccessToken(null);
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        // Даже если сервер недоступен, локальную сессию нужно очистить
+        state.user = null;
+        state.accessToken = null;
+        setAccessToken(null);
       })
       // Запрос восстановления
       .addCase(forgotPassword.fulfilled, (state, action) => {

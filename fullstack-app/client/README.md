@@ -1,16 +1,29 @@
-# React + Vite
+# Finance Tracker — клиент
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + Vite клиент для приложения учёта финансов.
 
-Currently, two official plugins are available:
+Полная документация проекта — в [../README.md](../README.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Запуск
 
-## React Compiler
+```bash
+npm install
+npm run dev      # http://localhost:5173
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+API проксируется на `http://localhost:5000` через `vite.config.js`.
 
-## Expanding the ESLint configuration
+## Структура
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `src/pages` — страницы (`/login`, `/register`, `/transactions`, `/analysis`)
+- `src/components` — `Layout`, `ProtectedRoute`, `AuthLayout`, SVG-графики
+- `src/features` — Redux-слайсы (`auth`, `transactions`) и утилиты аналитики
+- `src/api` — axios-клиенты
+- `src/app` — store и хранилище access-токена
+
+## Скрипты
+
+- `npm run dev` — dev-сервер
+- `npm run build` — production-сборка
+- `npm run lint` — ESLint
+- `npm run preview` — предпросмотр сборки

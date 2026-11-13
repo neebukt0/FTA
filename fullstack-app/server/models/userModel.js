@@ -16,6 +16,7 @@ export class UserModel {
         role TEXT DEFAULT 'user',
         savings REAL DEFAULT 0,
         isActivated INTEGER DEFAULT 0,
+        isBlocked INTEGER DEFAULT 0,
         activationToken TEXT,
         activationExpires INTEGER,
         resetTokenHash TEXT,
@@ -36,6 +37,7 @@ export class UserModel {
       "role TEXT DEFAULT 'user'",
       'savings REAL DEFAULT 0',
       'isActivated INTEGER DEFAULT 0',
+      'isBlocked INTEGER DEFAULT 0',
       'activationToken TEXT',
       'activationExpires INTEGER',
       'resetTokenHash TEXT',
@@ -61,6 +63,58 @@ export class UserModel {
 
   static async findById(db, id) {
     return await db.get('SELECT * FROM users WHERE id = ?', [id]);
+  }
+
+  /** Все пользователи с агрегатами по транзакциям — для админ-панели. */
+  static async listAll(db) {
+    return await db.all(`
+      SELECT
+        u.id,
+        u.firstName,
+        u.lastName,
+        u.username,
+        u.email,
+        u.phone,
+        COALESCE(u.role, 'user') AS role,
+        COALESCE(u.savings, 0) AS savings,
+        COALESCE(u.isActivated, 0) AS isActivated,
+        COALESCE(u.isBlocked, 0) AS isBlocked,
+        u.createdAt,
+        COUNT(t.id) AS transactionsCount,
+        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) AS totalIncome,
+        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0) AS totalExpense
+      FROM users u
+      LEFT JOIN transactions t ON t.userId = u.id
+      GROUP BY u.id
+      ORDER BY u.id
+    `);
+  }
+
+  static async setBlocked(db, id, blocked) {
+    return await db.run('UPDATE users SET isBlocked = ? WHERE id = ?', [blocked ? 1 : 0, id]);
+  }
+
+  /** Удаляет пользователя вместе с его транзакциями в одной транзакции БД. */
+  static async deleteById(db, id) {
+    await db.exec('BEGIN');
+    try {
+      await db.run('DELETE FROM transactions WHERE userId = ?', [id]);
+      const result = await db.run('DELETE FROM users WHERE id = ?', [id]);
+      await db.exec('COMMIT');
+      return result.changes > 0;
+    } catch (error) {
+      await db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
+  /** Сколько останется активных админов, если исключить указанного пользователя. */
+  static async countActiveAdminsExcept(db, userId) {
+    const row = await db.get(
+      "SELECT COUNT(*) AS c FROM users WHERE role = 'admin' AND COALESCE(isBlocked, 0) = 0 AND id != ?",
+      [userId]
+    );
+    return row?.c || 0;
   }
 
   static async create(db, userData) {
@@ -132,9 +186,5 @@ export class UserModel {
       'UPDATE users SET resetTokenHash = ?, resetTokenExpires = ? WHERE email = ?',
       [resetTokenHash, resetTokenExpires, email]
     );
-  }
-
-  static async addTransaction(db, userId, data) {
-    return await TransactionModel.add(db, userId, data, this);
   }
 }
